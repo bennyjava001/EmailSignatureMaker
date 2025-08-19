@@ -265,9 +265,10 @@ function updatePreview(){
 
   const footer = `
   <tr>
-    <td colspan="2" style="padding-top:8px;font-size:10px;color:#666;text-align:center;">
+    <td style="padding-top:8px;font-size:10px;color:#666;text-align:left;">
       Made with <a href="https://MailSignPro.com" style="color:#0077cc;text-decoration:none;">MailSignPro.com</a>
     </td>
+    <td></td>
   </tr>`;
 
   // Free version (with footer)
@@ -295,6 +296,7 @@ function updatePreview(){
   document.getElementById("previewPro").innerHTML = htmlPro;
   document.getElementById("previewPro").dataset.htmlSig = htmlPro;
 }
+
 
 function downloadHTML(type){
   let targetId = type === 'pro' ? "previewPro" : "previewFree";
