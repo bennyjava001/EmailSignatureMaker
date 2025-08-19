@@ -226,14 +226,15 @@ function buildTextCell(showIcons, name, title, phone, email, website, linkedin, 
 function buildImageCellPreview(){
   const radius = roundPhoto ? '50%' : '6px';
   if(photoDataURL){
-    return `<td valign="top" style="padding-right:10px;vertical-align:top;">
-      <img src="${photoDataURL}" height="${displaySize}" style="border-radius:${radius};">
+    return `<td valign="top" style="padding-right:10px; vertical-align:top; max-width:${displaySize}px;">
+      <img src="${photoDataURL}"
+           style="max-height:${displaySize}px; max-width:100%; height:auto; border-radius:${radius}; display:block;">
     </td>`;
   } else {
     // preview-only placeholder
     const border = roundPhoto ? 'none' : '1px solid #ccc';
-    return `<td valign="top" style="padding-right:10px;vertical-align:top;">
-      <div style="width:${displaySize}px;height:${displaySize}px;display:flex;align-items:center;justify-content:center;background:#eee;color:#999;border:${border};border-radius:${radius};font-size:24px;">👤</div>
+    return `<td valign="top" style="padding-right:10px; vertical-align:top; max-width:${displaySize}px;">
+      <div style="max-height:${displaySize}px; max-width:100%; width:${displaySize}px; height:${displaySize}px; display:flex; align-items:center; justify-content:center; background:#eee; color:#999; border:${border}; border-radius:${radius}; font-size:24px;">👤</div>
     </td>`;
   }
 }
@@ -241,10 +242,12 @@ function buildImageCellPreview(){
 function buildImageCellExport(){
   if(!photoDataURL) return ""; // no cell at all if no image uploaded
   const radius = roundPhoto ? '50%' : '6px';
-  return `<td valign="top" style="padding-right:10px;vertical-align:top;">
-    <img src="${photoDataURL}" height="${displaySize}" style="border-radius:${radius};">
+  return `<td valign="top" style="padding-right:10px; vertical-align:top; max-width:${displaySize}px;">
+    <img src="${photoDataURL}"
+         style="max-height:${displaySize}px; max-width:100%; height:auto; border-radius:${radius}; display:block;">
   </td>`;
 }
+
 
 function updatePreview(){
   const name = document.getElementById("name").value || "Jane Doe";
