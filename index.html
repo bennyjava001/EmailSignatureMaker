@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Email Signature Maker - Free HTML Email Signature Generator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✉️</text></svg>">
+
+<style>
+:root{
+  --brand-blue:#0077cc;--brand-dark:#333333;--brand-gray:#666666;--bg-light:#f9f9f9;
+}
+body{font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:20px;background:var(--bg-light);}
+header{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.logo{font-size:1.4rem;font-weight:bold;color:var(--brand-blue);}
+label{display:block;margin-top:10px;font-weight:bold;color:var(--brand-dark);}
+input[type="text"],input[type="file"],input[type="range"]{width:100%;padding:8px;margin-top:4px;border:1px solid #ccc;border-radius:4px;font-size:1rem;}
+.preview{margin-top:20px;border:1px solid #ccc;padding:15px;display:inline-block;background:#fff;overflow-x:auto;}
+button{margin-top:15px;padding:10px 20px;background:var(--brand-blue);color:#fff;border:none;border-radius:4px;font-size:1rem;cursor:pointer;}
+button:hover{background:#005fa3;}
+@media (max-width:600px){
+  body{padding:10px;}
+  .preview{font-size:.9rem;padding:10px;}
+  input{font-size:.9rem;}
+  button{width:100%;}
+}
+
+.preview-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: stretch; /* ensures equal height */
+}
+
+.preview-card {
+  flex: 1;
+  min-width: 300px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.preview-card h3 {
+  margin-top: 0;
+  color: var(--brand-dark);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.preview-card .preview {
+  flex-grow: 1; /* expand to fill card height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-card button {
+  margin-top: 15px;
+  align-self: center;
+}
+.pro-card {
+  position: relative;
+  overflow: hidden; /* keeps the ribbon inside */
+}
+
+.pro-card::before {
+  content: "PRO";
+  position: absolute;
+  top: 12px;
+  right: -35px;
+  transform: rotate(45deg);
+  background: var(--brand-blue);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 4px 40px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+
+
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">EmailSignatureMaker<span style="color:var(--brand-dark);">.com</span></div>
+</header>
+
+<h1>Create Your Email Signature</h1>
+<p>Fill out the form below and get your ready-to-use HTML email signature instantly.</p>
+
+<form id="sigForm">
+  <label>Name:
+    <input type="text" id="name" placeholder="Jane Doe">
+  </label>
+  <label>Title:
+    <input type="text" id="title" placeholder="Marketing Manager">
+  </label>
+  <label>Phone:
+    <input type="text" id="phone" placeholder="+1 234 567 890">
+  </label>
+  <label>Email:
+    <input type="text" id="email" placeholder="Jane@example.com">
+  </label>
+  <label>Website:
+    <input type="text" id="website" placeholder="https://example.com">
+  </label>
+  <label>LinkedIn URL:
+    <input type="text" id="linkedin" placeholder="https://linkedin.com/in/username">
+  </label>
+  <label>Address:
+    <input type="text" id="address" placeholder="123 Main St, City, Country">
+  </label>
+
+  <label>Upload Photo / Logo:
+    <input type="file" id="photo" accept="image/*">
+    <small>Recommended: square image, at least 200×200 px (max 300×300 will be used)</small>
+  </label>
+
+  <label>Photo Size (display):
+    <input type="range" id="photoSize" min="40" max="120" value="60">
+  </label>
+
+  <label>
+    <input type="checkbox" id="roundPhoto"> Make photo round
+  </label>
+
+  <label style="margin-top:15px;">
+    <input type="checkbox" id="showIcons"> Show icons next to contact details
+  </label>
+</form>
+
+<h2>Previews:</h2>
+<div class="preview-grid">
+  <div class="preview-card">
+    <h3>Free Version</h3>
+    <div class="preview" id="previewFree"></div>
+    <button onclick="downloadHTML('free')">Download Free</button>
+  </div>
+  <div class="preview-card pro-card">
+    <h3>Pro Version</h3>
+    <div class="preview" id="previewPro"></div>
+    <button onclick="downloadHTML('pro')">Download Pro</button>
+  </div>
+</div>
+
+
+
+
+<script>
+let photoDataURL = "";
+let displaySize = 60;
+let roundPhoto = false;
+
+document.getElementById("photo").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const img = new Image();
+    img.onload = function(){
+      const maxDim = 300;
+      let w = img.width, h = img.height;
+      if(w > h && w > maxDim){ h *= maxDim / w; w = maxDim; }
+      else if(h > maxDim){ w *= maxDim / h; h = maxDim; }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(w);
+      canvas.height = Math.round(h);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      photoDataURL = canvas.toDataURL("image/png");
+      updatePreview();
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById("photoSize").addEventListener("input", function(){
+  displaySize = this.value;
+  updatePreview();
+});
+
+document.getElementById("roundPhoto").addEventListener("change", function(){
+  roundPhoto = this.checked;
+  updatePreview();
+});
+
+function buildTextCell(showIcons, name, title, phone, email, website, linkedin, address){
+  const blue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue');
+  const dark = getComputedStyle(document.documentElement).getPropertyValue('--brand-dark');
+  const gray = getComputedStyle(document.documentElement).getPropertyValue('--brand-gray');
+
+  const phoneIcon = showIcons ? "📞 " : "";
+  const emailIcon = showIcons ? "✉️ " : "";
+  const webIcon   = showIcons ? "🌐 " : "";
+  const inIcon    = showIcons ? "💼 " : "";
+  const addrIcon  = showIcons ? "📍 " : "";
+
+  return `
+<td valign="top" style="vertical-align:top; padding-left:12px; border-left:2px solid ${gray};">
+  <strong style="color:${dark};font-size:15px;">${name}</strong><br>
+  <span style="color:${gray};font-size:13px;">${title}</span><br>
+  ${phoneIcon}<a href="tel:${phone}" style="color:${blue}">${phone}</a><br>
+  ${emailIcon}<a href="mailto:${email}" style="color:${blue}">${email}</a><br>
+  ${webIcon}<a href="${website}" style="color:${blue}">${website}</a><br>
+  ${inIcon}<a href="${linkedin}" style="color:${blue}">LinkedIn</a><br>
+  ${addrIcon}<span style="color:${gray}">${address}</span>
+</td>`;
+}
+
+
+function buildImageCellPreview(){
+  const radius = roundPhoto ? '50%' : '6px';
+  if(photoDataURL){
+    return `<td valign="top" style="padding-right:10px;vertical-align:top;">
+      <img src="${photoDataURL}" height="${displaySize}" style="border-radius:${radius};">
+    </td>`;
+  } else {
+    // preview-only placeholder
+    const border = roundPhoto ? 'none' : '1px solid #ccc';
+    return `<td valign="top" style="padding-right:10px;vertical-align:top;">
+      <div style="width:${displaySize}px;height:${displaySize}px;display:flex;align-items:center;justify-content:center;background:#eee;color:#999;border:${border};border-radius:${radius};font-size:24px;">👤</div>
+    </td>`;
+  }
+}
+
+function buildImageCellExport(){
+  if(!photoDataURL) return ""; // no cell at all if no image uploaded
+  const radius = roundPhoto ? '50%' : '6px';
+  return `<td valign="top" style="padding-right:10px;vertical-align:top;">
+    <img src="${photoDataURL}" height="${displaySize}" style="border-radius:${radius};">
+  </td>`;
+}
+
+function updatePreview(){
+  const name = document.getElementById("name").value || "Jane Doe";
+  const title = document.getElementById("title").value || "Your Title";
+  const phone = document.getElementById("phone").value || "+1 234 567 890";
+  const email = document.getElementById("email").value || "Jane@example.com";
+  const website = document.getElementById("website").value || "https://example.com";
+  const linkedin = document.getElementById("linkedin").value || "https://linkedin.com";
+  const address = document.getElementById("address").value || "123 Main St, City, Country";
+  const showIcons = document.getElementById("showIcons").checked;
+
+  const textCell = buildTextCell(showIcons, name, title, phone, email, website, linkedin, address);
+  const imgCellPreview = buildImageCellPreview();
+  const imgCellExport  = buildImageCellExport();
+
+  const footer = `
+  <tr>
+    <td colspan="2" style="padding-top:8px;font-size:10px;color:#666;text-align:center;">
+      Made with <a href="https://EmailSignatureMaker.com" style="color:#0077cc;text-decoration:none;">EmailSignatureMaker.com</a>
+    </td>
+  </tr>`;
+
+  // Free version (with footer)
+  const htmlFree = `
+<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:20px;">
+  <tr>
+    ${imgCellPreview}
+    ${textCell}
+  </tr>
+  ${footer}
+</table>`.trim();
+
+  // Pro version (without footer)
+  const htmlPro = `
+<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:20px;">
+  <tr>
+    ${imgCellPreview}
+    ${textCell}
+  </tr>
+</table>`.trim();
+
+  document.getElementById("previewFree").innerHTML = htmlFree;
+  document.getElementById("previewFree").dataset.htmlSig = htmlFree;
+
+  document.getElementById("previewPro").innerHTML = htmlPro;
+  document.getElementById("previewPro").dataset.htmlSig = htmlPro;
+}
+
+function downloadHTML(type){
+  let targetId = type === 'pro' ? "previewPro" : "previewFree";
+  const htmlSig = document.getElementById(targetId).dataset.htmlSig || "";
+
+  if(type === 'pro'){
+    // Placeholder: in the future redirect to payment instead
+    alert("This feature will be available after payment integration.");
+    return;
+  }
+
+  const blob = new Blob([htmlSig], {type:"text/html"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = type === 'pro' ? "MyEmailSignPro.html" : "MyEmailSignFree.html";
+  a.click();
+}
+
+
+document.querySelectorAll("#sigForm input").forEach(el => el.addEventListener("input", updatePreview));
+
+updatePreview();
+</script>
+
+</body>
+</html>
